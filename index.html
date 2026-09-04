@@ -26,11 +26,8 @@
         .btn-danger { background: #dc2626; }
         .btn-danger:hover { background: #b91c1c; }
         .btn-purple { background: #7c3aed; }
-        .btn-purple:hover { background: #6d28d9; }
         .btn-indigo { background: #4f46e5; }
-        .btn-indigo:hover { background: #4338ca; }
         .btn-green { background: #16a34a; }
-        .btn-green:hover { background: #15803d; }
         .btn-secondary { background: #64748b; }
         
         header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #e2e8f0; padding-bottom: 15px; margin-bottom: 20px; }
@@ -55,12 +52,6 @@
         .text-sm { font-size: 12px; }
         .font-bold { font-weight: bold; }
         .flex-row { display: flex; gap: 10px; }
-        
-        @media print {
-            body * { display: none; }
-            #seccionImprimir, #seccionImprimir * { display: block; }
-            #seccionImprimir { position: absolute; left: 0; top: 0; width: 100%; }
-        }
     </style>
 </head>
 <body>
@@ -180,23 +171,6 @@
                 <button onclick="registrarNuevoUsuario()" class="btn btn-indigo" style="width: auto; padding: 8px 16px;">Crear</button>
             </div>
         </div>
-    </div>
-
-    <!-- VISTA DE IMPRESIÓN -->
-    <div id="seccionImprimir" class="hidden" style="padding: 20px;">
-        <h1 style="font-size: 22px; font-weight: bold; text-align: center; margin-bottom: 5px;">Agenda de Actividades y Tareas Bimestrales</h1>
-        <h3 id="printUnidadNombre" style="text-align: center; font-size: 16px; margin-bottom: 20px; color: #475569; border-bottom: 1px solid #ccc; padding-bottom: 10px;"></h3>
-        <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
-            <thead>
-                <tr style="background: #f1f5f9;">
-                    <th style="border: 1px solid #94a3b8; padding: 8px; text-align: left;">Fecha</th>
-                    <th style="border: 1px solid #94a3b8; padding: 8px; text-align: left;">Tipo / Creador</th>
-                    <th style="border: 1px solid #94a3b8; padding: 8px; text-align: left;">Asignatura</th>
-                    <th style="border: 1px solid #94a3b8; padding: 8px; text-align: left;">Descripción</th>
-                </tr>
-            </thead>
-            <tbody id="tablaReporteCuerpo"></tbody>
-        </table>
     </div>
 
     <script>
@@ -346,11 +320,7 @@
                             </div>`;
                     
                     if(esMiActividad) {
-                        htmlItem += `
-                            <div style="display: flex; flex-direction: column; gap: 4px; margin-left: 10px;">
-                                <button onclick="editarActividadPrompt(${act.idFila}, '${act.descripcion.replace(/'/g, "\\'")}', '${act.asignatura}')" style="background:none; border:none; color:#2563eb; cursor:pointer; font-size:11px;">Editar</button>
-                                <button onclick="eliminarActividad(${act.idFila})" style="background:none; border:none; color:#dc2626; cursor:pointer; font-size:11px;">Borrar</button>
-                            </div>`;
+                        htmlItem += `<button onclick="eliminarActividad(${act.idFila})" style="background:none; border:none; color:#dc2626; cursor:pointer; font-size:11px; margin-left:10px;">Borrar</button>`;
                     }
                     htmlItem += `</div>`;
                     contenedor.innerHTML += htmlItem;
@@ -399,20 +369,6 @@
         async function eliminarActividad(idFila) {
             if(!confirm("¿Estás seguro de eliminar esta actividad?")) return;
             const res = await callAPI({ action: "eliminarActividad", idFila });
-            if(res && res.success) {
-                alert(res.message);
-                cerrarModal();
-                cargarCalendario();
-            }
-        }
-
-        async function editarActividadPrompt(idFila, descActual, asigActual) {
-            const nuevaDesc = prompt("Modificar descripción:", descActual);
-            if(nuevaDesc === null) return;
-            const nuevaAsig = prompt("Modificar asignatura:", asigActual);
-            if(nuevaAsig === null) return;
-
-            const res = await callAPI({ action: "modificarActividad", idFila, nuevaDesc, nuevaAsignatura: nuevaAsig });
             if(res && res.success) {
                 alert(res.message);
                 cerrarModal();
@@ -505,21 +461,18 @@
             const [inicio, fin] = val.split('|');
 
             const resultado = await callAPI({ action: "obtenerReporteBimestre", inicio, fin });
-            const cuerpo = document.getElementById('tablaReporteCuerpo');
-            cuerpo.innerHTML = '';
-
             if(resultado && resultado.length > 0) {
+                let ventana = window.open('', '_blank');
+                let html = `<html><head><title>Reporte</title></head><body style="font-family:sans-serif; padding:20px;">`;
+                html += `<h2>Reporte de Actividades (${inicio} a ${fin})</h2><table border="1" cellpadding="6" style="border-collapse:collapse; width:100%;">`;
+                html += `<tr><th>Fecha</th><th>Tipo/Creador</th><th>Asignatura</th><th>Descripción</th></tr>`;
                 resultado.forEach(r => {
-                    cuerpo.innerHTML += `
-                        <tr>
-                            <td style="border: 1px solid #94a3b8; padding: 6px;">${r.fecha}</td>
-                            <td style="border: 1px solid #94a3b8; padding: 6px; font-weight: bold;">[${r.tipo}] (${r.creador})</td>
-                            <td style="border: 1px solid #94a3b8; padding: 6px;">${r.asignatura}</td>
-                            <td style="border: 1px solid #94a3b8; padding: 6px;">${r.descripcion}</td>
-                        </tr>`;
+                    html += `<tr><td>${r.fecha}</td><td><b>[${r.tipo}]</b> (${r.creador})</td><td>${r.asignatura}</td><td>${r.descripcion}</td></tr>`;
                 });
-                document.getElementById('printUnidadNombre').innerText = `Reporte del ${inicio} al ${fin}`;
-                window.print();
+                html += `</table></body></html>`;
+                ventana.document.write(html);
+                ventana.document.close();
+                ventana.print();
             } else {
                 alert("No hay actividades registradas en este período.");
             }
