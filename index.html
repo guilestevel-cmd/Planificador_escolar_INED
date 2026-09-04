@@ -4,173 +4,102 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Planificador Bimestral Escolar</title>
+    <script src="https://tailwindcss.com"></script>
     <style>
-        :root {
-            --primary: #2563eb;
-            --primary-hover: #1d4ed8;
-            --bg-color: #f8fafc;
-            --card-bg: #ffffff;
-            --text-color: #1e293b;
-            --border-color: #cbd5e1;
-        }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background-color: var(--bg-color); color: var(--text-color); padding: 20px; }
-        
-        .container { max-width: 1100px; margin: 0 auto; }
-        .card { background: var(--card-bg); border-radius: 8px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px; border: 1px solid #e2e8f0; }
-        
-        #loginBox { max-width: 400px; margin: 80px auto; padding: 30px; background: white; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-        .form-control { width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 14px; }
-        .btn { width: 100%; padding: 10px; background: var(--primary); color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 14px; }
-        .btn:hover { background: var(--primary-hover); }
-        .btn-danger { background: #dc2626; }
-        .btn-danger:hover { background: #b91c1c; }
-        .btn-purple { background: #7c3aed; }
-        .btn-indigo { background: #4f46e5; }
-        .btn-green { background: #16a34a; }
-        .btn-secondary { background: #64748b; }
-        
-        header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #e2e8f0; padding-bottom: 15px; margin-bottom: 20px; }
-        .grid-tools { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px; margin-bottom: 20px; }
-        
-        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; }
-        .calendar-header { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; text-align: center; font-weight: bold; color: #475569; margin-bottom: 8px; }
-        .day-cell { border: 1px solid var(--border-color); border-radius: 6px; padding: 8px; min-height: 95px; cursor: pointer; background: white; display: flex; flex-direction: column; justify-content: space-between; transition: 0.2s; }
-        .day-cell:hover { background: #f1f5f9; }
-        
         .bg-disponible { background-color: #def7ec; color: #03543f; }
         .bg-media { background-color: #fef08a; color: #713f12; }
-        .bg-lleno { background-color: #fee2e2; color: #991b1b; }
-        .borde-unidad-inicio { border-left: 5px solid #2563eb !important; }
-        .borde-unidad-fin { border-right: 5px solid #dc2626 !important; }
-
-        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; padding: 20px; z-index: 1000; }
-        .modal-content { background: white; padding: 25px; border-radius: 8px; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
-        
-        .hidden { display: none !important; }
-        .text-center { text-align: center; }
-        .text-sm { font-size: 12px; }
-        .font-bold { font-weight: bold; }
-        .flex-row { display: flex; gap: 10px; }
+        .bg-lleno { background-color: #e5e7eb; color: #374151; }
+        @media print {
+            body * { display: none; }
+            #seccionImprimir, #seccionImprimir * { display: block; }
+            #seccionImprimir { position: absolute; left: 0; top: 0; width: 100%; }
+        }
     </style>
 </head>
-<body>
+<body class="bg-gray-50 text-gray-800 font-sans">
 
     <!-- LOGIN -->
-    <div id="loginBox" class="card">
-        <h2 class="text-center font-bold" style="color: var(--primary); font-size: 24px; margin-bottom: 5px;">Planificador Escolar</h2>
-        <p class="text-center text-sm" style="color: #64748b; margin-bottom: 20px;">Ingresa con tus credenciales asignadas</p>
-        <input type="text" id="user" placeholder="Usuario (Ej. admin)" class="form-control">
-        <input type="password" id="pass" placeholder="Contraseña" class="form-control">
-        <button onclick="ejecutarLogin()" class="btn">Ingresar</button>
-        <div class="text-center text-sm" style="color: #94a3b8; margin-top: 15px;">
-            Admin por defecto: <b>admin</b> / <b>admin123</b>
-        </div>
+    <div id="loginBox" class="max-w-md mx-auto mt-20 p-6 bg-white rounded-lg shadow-md">
+        <h2 class="text-2xl font-bold mb-4 text-center text-blue-600">Planificador Escolar</h2>
+        <input type="text" id="user" placeholder="Usuario" class="w-full p-2 border mb-3 rounded">
+        <input type="password" id="pass" placeholder="Contraseña" class="w-full p-2 border mb-4 rounded">
+        <button onclick="ejecutarLogin()" class="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700">Ingresar</button>
     </div>
 
     <!-- PANEL PRINCIPAL -->
-    <div id="appContainer" class="container hidden">
-        <header>
+    <div id="appContainer" class="hidden max-w-6xl mx-auto p-4">
+        <header class="flex justify-between items-center mb-6 border-b pb-4">
             <div>
-                <h1 style="font-size: 24px; font-weight: bold;">Calendario Bimestral</h1>
-                <p class="text-sm" style="color: #64748b;">Sesión: <span id="sesionNombre" class="font-bold"></span> (<span id="sesionRol" style="color: var(--primary);"></span>)</p>
+                <h1 class="text-3xl font-bold text-gray-900">Calendario Bimestral</h1>
+                <p class="text-sm text-gray-500">Sesión: <span id="sesionNombre" class="font-bold"></span> (<span id="sesionRol"></span>)</p>
             </div>
-            <button onclick="location.reload()" class="btn btn-danger" style="width: auto; padding: 8px 16px;">Salir</button>
+            <button onclick="location.reload()" class="bg-red-500 text-white px-4 py-2 rounded text-sm">Salir</button>
         </header>
 
-        <!-- HERRAMIENTAS -->
-        <div class="grid-tools">
-            <div id="adminPanel" class="card hidden" style="margin-bottom: 0;">
-                <h3 class="font-bold" style="color: #4f46e5; margin-bottom: 10px;">⚙️ Administración</h3>
-                <button onclick="mostrarModalUser()" class="btn btn-indigo text-sm" style="margin-bottom: 8px;">Crear Usuarios</button>
-                <button onclick="mostrarModalUnidad()" class="btn btn-purple text-sm">Configurar / Editar Unidades</button>
+        <!-- MENÚ ROLES -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div id="adminPanel" class="hidden bg-white p-4 rounded-lg shadow border">
+                <h3 class="font-bold text-lg mb-2 text-indigo-700">⚙️ Administración</h3>
+                <button onclick="mostrarModalUser()" class="w-full bg-indigo-600 text-white p-2 rounded mb-2 text-sm">Crear Usuarios</button>
+                <button onclick="mostrarModalUnidad()" class="w-full bg-purple-600 text-white p-2 rounded text-sm">Configurar Unidades</button>
             </div>
-
-            <div class="card" style="margin-bottom: 0;">
-                <label class="font-bold text-sm" style="display: block; margin-bottom: 5px;">Ver otro mes:</label>
-                <input type="month" id="selectorMes" onchange="cargarCalendario()" class="form-control" style="margin-bottom: 8px;">
-                <div class="text-sm" style="color: #64748b; display: flex; align-items: center; gap: 8px;">
-                    <span style="width: 12px; height: 12px; background: #2563eb; display: inline-block;"></span> Inicio Unidad
-                    <span style="width: 12px; height: 12px; background: #dc2626; display: inline-block; margin-left: 10px;"></span> Fin Unidad
-                </div>
+            <div class="bg-white p-4 rounded-lg shadow border flex flex-col justify-center">
+                <label class="block font-medium mb-1 text-sm">Ver otro mes:</label>
+                <input type="month" id="selectorMes" onchange="cargarCalendario()" class="p-2 border rounded">
             </div>
-
-            <div class="card" style="margin-bottom: 0;">
-                <label class="font-bold text-sm" style="display: block; margin-bottom: 5px;">Imprimir Reporte:</label>
-                <select id="selectUnidadesReporte" class="form-control" style="margin-bottom: 8px;"></select>
-                <button onclick="generarReporte()" class="btn btn-green text-sm">Generar Lista Bimestral</button>
+            <div class="bg-white p-4 rounded-lg shadow border flex flex-col justify-center">
+                <label class="block font-medium mb-1 text-sm">Imprimir Reporte:</label>
+                <select id="selectUnidadesReporte" class="p-2 border rounded mb-2"></select>
+                <button onclick="generarReporte()" class="bg-green-600 text-white p-2 rounded text-sm hover:bg-green-700">Generar Lista Bimestral</button>
             </div>
         </div>
 
         <!-- CALENDARIO -->
-        <div class="card">
-            <div class="calendar-header">
+        <div class="bg-white p-6 rounded-lg shadow">
+            <div class="grid grid-cols-7 gap-2 text-center font-bold text-gray-600 mb-2">
                 <div>Dom</div><div>Lun</div><div>Mar</div><div>Mié</div><div>Jue</div><div>Vie</div><div>Sáb</div>
             </div>
-            <div id="calendarioGrid" class="calendar-grid"></div>
+            <div id="calendarioGrid" class="grid grid-cols-7 gap-2 min-h-[400px]"></div>
         </div>
     </div>
 
-    <!-- MODAL DETALLES / ACTIVIDAD -->
-    <div id="modalDia" class="modal-overlay">
-        <div class="modal-content">
-            <h3 id="modalFechaTitulo" class="font-bold" style="color: var(--primary); margin-bottom: 8px; font-size: 18px;"></h3>
-            <div id="infoUnidadDia" class="text-sm" style="background: #e0f2fe; color: #0369a1; padding: 8px; border-radius: 4px; margin-bottom: 12px; font-weight: bold;"></div>
-            
-            <div style="margin-bottom: 15px;">
-                <h4 class="text-sm font-bold" style="margin-bottom: 5px;">Actividades Registradas:</h4>
-                <div id="actividadesExistentes" style="max-height: 180px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;"></div>
-            </div>
-
-            <div style="border-top: 1px solid #e2e8f0; padding-top: 12px;">
-                <h4 class="text-sm font-bold" style="margin-bottom: 8px;">Registrar Nueva Actividad</h4>
-                
-                <div id="seccionAsignatura" style="margin-bottom: 8px;">
-                    <label class="text-sm" style="display: block; margin-bottom: 3px;">Asignatura:</label>
-                    <input type="text" id="actAsignatura" placeholder="Ej. Programación I" class="form-control" style="margin-bottom: 0;">
+    <!-- MODAL DETALLES -->
+    <div id="modalDia" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-lg p-6 max-w-md w-full shadow-xl">
+            <h3 id="modalFechaTitulo" class="text-xl font-bold mb-4"></h3>
+            <div id="actividadesExistentes" class="mb-4 space-y-2 max-h-40 overflow-y-auto"></div>
+            <div id="formularioActividad" class="border-t pt-4">
+                <div class="mb-3">
+                    <label class="block text-sm font-medium mb-1">Tipo de Actividad</label>
+                    <select id="actTipo" class="w-full p-2 border rounded">
+                        <option value="Profesor">Profesor (Tarea/Actividad)</option>
+                        <option value="Comisión">Comisión (Institucional)</option>
+                    </select>
                 </div>
-
-                <label class="text-sm" style="display: block; margin-bottom: 3px;">Descripción de la Actividad:</label>
-                <textarea id="actDescripcion" class="form-control" placeholder="Escribe los detalles..." style="height: 70px; resize: none;"></textarea>
-                
-                <div class="flex-row" style="justify-content: flex-end;">
-                    <button onclick="cerrarModal()" class="btn btn-secondary" style="width: auto; padding: 8px 16px;">Cancelar</button>
-                    <button onclick="guardarActividad()" class="btn" style="width: auto; padding: 8px 16px;">Guardar</button>
+                <label class="block text-sm font-medium mb-1">Descripción</label>
+                <textarea id="actDescripcion" class="w-full p-2 border rounded mb-3" placeholder="Escribe la descripción..."></textarea>
+                <div class="flex justify-end space-x-2">
+                    <button onclick="cerrarModal()" class="bg-gray-300 px-4 py-2 rounded">Cancelar</button>
+                    <button onclick="guardarActividad()" class="bg-blue-600 text-white px-4 py-2 rounded">Guardar</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- MODAL UNIDADES -->
-    <div id="modalUnidad" class="modal-overlay">
-        <div class="modal-content">
-            <h3 class="font-bold" style="color: #7c3aed; margin-bottom: 15px; font-size: 18px;">📅 Configurar Unidades</h3>
-            <div id="listaUnidadesConfig" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px; max-height: 220px; overflow-y: auto;"></div>
-            <button onclick="agregarFilaUnidadConfig()" class="btn btn-secondary text-sm" style="margin-bottom: 15px;">+ Añadir otra unidad</button>
-            <div class="flex-row" style="justify-content: flex-end; border-top: 1px solid #e2e8f0; padding-top: 10px;">
-                <button onclick="document.getElementById('modalUnidad').classList.add('hidden')" class="btn btn-secondary" style="width: auto; padding: 8px 16px;">Cancelar</button>
-                <button onclick="guardarTodasUnidades()" class="btn btn-purple" style="width: auto; padding: 8px 16px;">Guardar Cambios</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- MODAL USUARIOS -->
-    <div id="modalUser" class="modal-overlay">
-        <div class="modal-content" style="max-width: 400px;">
-            <h3 class="font-bold" style="color: #4f46e5; margin-bottom: 15px; font-size: 18px;">👤 Crear Nuevo Usuario</h3>
-            <input type="text" id="nuevoUser" placeholder="Nombre de Usuario" class="form-control">
-            <input type="password" id="nuevaClave" placeholder="Contraseña" class="form-control">
-            <select id="nuevoRol" class="form-control" style="margin-bottom: 15px;">
-                <option value="Profesor">Profesor</option>
-                <option value="Comisión">Comisión</option>
-                <option value="Dirección">Dirección</option>
-                <option value="Administrador">Administrador</option>
-            </select>
-            <div class="flex-row" style="justify-content: flex-end;">
-                <button onclick="document.getElementById('modalUser').classList.add('hidden')" class="btn btn-secondary" style="width: auto; padding: 8px 16px;">Cancelar</button>
-                <button onclick="registrarNuevoUsuario()" class="btn btn-indigo" style="width: auto; padding: 8px 16px;">Crear</button>
-            </div>
-        </div>
+    <!-- VISTA DE IMPRESIÓN -->
+    <div id="seccionImprimir" class="hidden p-8">
+        <h1 class="text-2xl font-bold text-center mb-2">Agenda de Actividades y Tareas Bimestrales</h1>
+        <h3 id="printUnidadNombre" class="text-center text-lg mb-6 border-b pb-2"></h3>
+        <table class="w-full border-collapse border border-gray-400">
+            <thead>
+                <tr class="bg-gray-100">
+                    <th class="border border-gray-400 p-2 text-left">Fecha</th>
+                    <th class="border border-gray-400 p-2 text-left">Tipo / Creador</th>
+                    <th class="border border-gray-400 p-2 text-left">Descripción de la Actividad</th>
+                </tr>
+            </thead>
+            <tbody id="tablaReporteCuerpo"></tbody>
+        </table>
     </div>
 
     <script>
@@ -178,28 +107,28 @@
         let usuarioActual = null;
         let rolActual = null;
         let fechaSeleccionada = null;
-        let datosGenerales = { conteo: {}, unidades: [] };
+        let baseDatosMes = {};
 
         const hoy = new Date();
         document.getElementById('selectorMes').value = `${hoy.getFullYear()}-${String(hoy.getMonth()+1).padStart(2,'0')}`;
 
         async function callAPI(payload) {
             try {
-                const response = await fetch(API_URL, { method: "POST", body: JSON.stringify(payload) });
+                const response = await fetch(API_URL, {
+                    method: "POST",
+                    body: JSON.stringify(payload)
+                });
                 return await response.json();
             } catch (error) {
-                console.error("Error en API:", error);
-                alert("Error de conexión con el servidor.");
+                console.error("Error en la conexión con la API:", error);
+                alert("Error de conexión con el servidor escolar.");
             }
         }
 
         async function ejecutarLogin() {
-            const u = document.getElementById('user').value.trim();
-            const p = document.getElementById('pass').value.trim();
-            if(!u || !p) return alert("Ingresa usuario y contraseña");
-
+            const u = document.getElementById('user').value;
+            const p = document.getElementById('pass').value;
             const res = await callAPI({ action: "login", usuario: u, clave: p });
-            
             if(res && res.success) {
                 usuarioActual = res.usuario;
                 rolActual = res.rol;
@@ -207,11 +136,11 @@
                 document.getElementById('appContainer').classList.remove('hidden');
                 document.getElementById('sesionNombre').innerText = usuarioActual;
                 document.getElementById('sesionRol').innerText = rolActual;
-                
-                if(rolActual === 'Administrador') {
+                if(rolActual === 'Administrador' || rolActual === 'Comisión') {
                     document.getElementById('adminPanel').classList.remove('hidden');
                 }
                 cargarCalendario();
+                actualizarUnidadesReporte();
             } else {
                 alert(res ? res.message : "Error al iniciar sesión");
             }
@@ -219,11 +148,10 @@
 
         async function cargarCalendario() {
             const [year, month] = document.getElementById('selectorMes').value.split('-');
-            const respuesta = await callAPI({ action: "obtenerDatosMes", year: parseInt(year), month: parseInt(month) - 1 });
-            if (respuesta && respuesta.success) {
-                datosGenerales = respuesta;
+            const datos = await callAPI({ action: "obtenerDatosMes", year, month });
+            if (datos) {
+                baseDatosMes = datos;
                 renderizarDias(parseInt(year), parseInt(month) - 1);
-                actualizarSelectorReporte();
             }
         }
 
@@ -232,50 +160,37 @@
             grid.innerHTML = '';
             const primerDia = new Date(year, month, 1).getDay();
             const totalDias = new Date(year, month + 1, 0).getDate();
-
+            
             for(let i=0; i<primerDia; i++) {
                 grid.appendChild(document.createElement('div'));
             }
-
+            
             for(let dia=1; dia<=totalDias; dia++) {
                 const celda = document.createElement('div');
                 const mesPad = String(month+1).padStart(2,'0');
                 const diaPad = String(dia).padStart(2,'0');
                 const llaveFecha = `${year}-${mesPad}-${diaPad}`;
-
-                celda.className = "day-cell";
-
-                datosGenerales.unidades.forEach(u => {
-                    if (u.inicio === llaveFecha) celda.classList.add('borde-unidad-inicio');
-                    if (u.fin === llaveFecha) celda.classList.add('borde-unidad-fin');
-                });
-
-                let htmlContenido = `<span class="font-bold" style="font-size: 13px;">${dia}</span>`;
-                let info = datosGenerales.conteo[llaveFecha];
-
-                if(info) {
-                    if(info.comision) {
-                        celda.classList.add('bg-lleno');
-                        htmlContenido += `<span class="text-sm" style="background:#fca5a5; color:#7f1d1d; padding:2px; border-radius:3px; font-weight:bold; display:block; text-align:center;">Comisión</span>`;
-                    } else if(info.direccion) {
-                        celda.classList.add('bg-lleno');
-                        htmlContenido += `<span class="text-sm" style="background:#d8b4fe; color:#581c87; padding:2px; border-radius:3px; font-weight:bold; display:block; text-align:center;">Dirección</span>`;
-                    } else if(info.tareas >= 5) {
-                        celda.classList.add('bg-lleno');
-                        htmlContenido += `<span class="text-sm font-bold" style="display:block; text-align:center;">Lleno (5 tareas)</span>`;
-                    } else if(info.tareas >= 3) {
-                        celda.classList.add('bg-media');
-                        htmlContenido += `<span class="text-sm font-bold" style="display:block; text-align:center;">${info.tareas} tareas</span>`;
-                    } else {
-                        celda.classList.add('bg-disponible');
-                        htmlContenido += `<span class="text-sm font-bold" style="display:block; text-align:center;">${info.tareas} tareas</span>`;
-                    }
+                
+                celda.className = "border rounded p-2 cursor-pointer h-20 flex flex-col justify-between transition-colors";
+                celda.innerHTML = `<span class="font-bold text-sm">${dia}</span>`;
+                
+                let info = baseDatosMes[llaveFecha];
+                if(!info) {
+                    celda.classList.add('bg-disponible');
+                } else if(info.comision) {
+                    celda.classList.add('bg-lleno');
+                    celda.innerHTML += `<span class="text-[10px] bg-red-200 px-1 rounded block truncate">Comisión</span>`;
+                } else if(info.tareas >= 5) {
+                    celda.classList.add('bg-lleno');
+                    celda.innerHTML += `<span class="text-[10px] text-center font-semibold block">Lleno (5)</span>`;
+                } else if(info.tareas >= 3) {
+                    celda.classList.add('bg-media');
+                    celda.innerHTML += `<span class="text-[10px] block">${info.tareas} tareas</span>`;
                 } else {
                     celda.classList.add('bg-disponible');
-                    htmlContenido += `<span class="text-sm" style="color: #047857; display:block; text-align:center;">Disponible</span>`;
+                    celda.innerHTML += `<span class="text-[10px] block">${info.tareas} tareas</span>`;
                 }
-
-                celda.innerHTML = htmlContenido;
+                
                 celda.onclick = () => abrirDia(llaveFecha);
                 grid.appendChild(celda);
             }
@@ -284,78 +199,38 @@
         function abrirDia(fecha) {
             fechaSeleccionada = fecha;
             document.getElementById('modalFechaTitulo').innerText = `Actividades del: ${fecha}`;
-            
-            let unidadEncontrada = datosGenerales.unidades.find(u => fecha >= u.inicio && fecha <= u.fin);
-            const infoUnidadDiv = document.getElementById('infoUnidadDia');
-            if(unidadEncontrada) {
-                infoUnidadDiv.innerText = `📌 Rango detectado: ${unidadEncontrada.nombre} (${unidadEncontrada.inicio} al ${unidadEncontrada.fin})`;
-                infoUnidadDiv.classList.remove('hidden');
-            } else {
-                infoUnidadDiv.innerText = "⚠️ Fuera del rango oficial de las unidades.";
-                infoUnidadDiv.classList.remove('hidden');
-            }
-
-            const seccionAsignatura = document.getElementById('seccionAsignatura');
-            if(rolActual === 'Comisión' || rolActual === 'Dirección') {
-                seccionAsignatura.classList.add('hidden');
-            } else {
-                seccionAsignatura.classList.remove('hidden');
-            }
-
             const contenedor = document.getElementById('actividadesExistentes');
             contenedor.innerHTML = '';
-            let info = datosGenerales.conteo[fecha];
-
+            
+            let info = baseDatosMes[fecha];
             if(info && info.detalles.length > 0) {
                 info.detalles.forEach(act => {
-                    let esMiActividad = (act.creador === usuarioActual || rolActual === 'Administrador');
-                    let badgeBg = act.tipo === 'Comisión' ? '#fee2e2' : (act.tipo === 'Dirección' ? '#f3e8ff' : '#e0f2fe');
-                    let badgeColor = act.tipo === 'Comisión' ? '#991b1b' : (act.tipo === 'Dirección' ? '#6b21a8' : '#0369a1');
-                    
-                    let htmlItem = `
-                        <div style="border: 1px solid #cbd5e1; border-radius: 6px; padding: 8px; background: #f8fafc; font-size: 12px; display: flex; justify-content: space-between; align-items: flex-start;">
-                            <div>
-                                <span style="background: ${badgeBg}; color: ${badgeColor}; padding: 1px 4px; border-radius: 3px; font-weight: bold;">[${act.tipo}]</span> 
-                                <span class="font-bold">(${act.creador})</span> 
-                                ${act.asignatura !== 'N/A' ? `- <span style="color: #4f46e5; font-weight: 600;">[${act.asignatura}]</span>` : ''}
-                                <p style="margin-top: 4px; color: #334155;">${act.descripcion}</p>
-                            </div>`;
-                    
-                    if(esMiActividad) {
-                        htmlItem += `<button onclick="eliminarActividad(${act.idFila})" style="background:none; border:none; color:#dc2626; cursor:pointer; font-size:11px; margin-left:10px;">Borrar</button>`;
-                    }
-                    htmlItem += `</div>`;
-                    contenedor.innerHTML += htmlItem;
+                    contenedor.innerHTML += `
+                        <div class="p-2 border rounded bg-gray-100 text-xs">
+                            <strong class="text-blue-700">[${act.tipo}] (${act.creador}):</strong> ${act.descripcion}
+                        </div>`;
                 });
             } else {
-                contenedor.innerHTML = '<p class="text-sm" style="color: #64748b; font-style: italic;">No hay actividades registradas en este día.</p>';
+                contenedor.innerHTML = '<p class="text-sm text-gray-500 italic">No hay actividades registradas.</p>';
             }
-
             document.getElementById('modalDia').classList.remove('hidden');
         }
 
         function cerrarModal() {
             document.getElementById('modalDia').classList.add('hidden');
             document.getElementById('actDescripcion').value = '';
-            document.getElementById('actAsignatura').value = '';
         }
 
         async function guardarActividad() {
             const desc = document.getElementById('actDescripcion').value;
-            const asignatura = (rolActual === 'Profesor') ? document.getElementById('actAsignatura').value : rolActual;
-            
-            if(!desc.trim()) return alert("Escribe una descripción.");
-            if(rolActual === 'Profesor' && !asignatura.trim()) return alert("Indica la asignatura.");
-
-            let tipoActividad = rolActual;
-            if(rolActual === 'Administrador') tipoActividad = 'Dirección';
+            const tipo = document.getElementById('actTipo').value;
+            if(!desc.trim()) return alert("Escribe una descripción");
 
             const res = await callAPI({
                 action: "agregarActividad",
                 fecha: fechaSeleccionada,
-                tipo: tipoActividad,
+                tipo: tipo,
                 creador: usuarioActual,
-                asignatura: asignatura,
                 descripcion: desc
             });
 
@@ -364,120 +239,77 @@
                 cerrarModal();
                 cargarCalendario();
             } else {
-                alert(res ? res.message : "Error al registrar");
+                alert(res ? res.message : "Error al registrar la actividad");
             }
         }
 
-        async function eliminarActividad(idFila) {
-            if(!confirm("¿Estás seguro de eliminar esta actividad?")) return;
-            const res = await callAPI({ action: "eliminarActividad", idFila });
-            if(res && res.success) {
-                alert(res.message);
-                cerrarModal();
-                cargarCalendario();
-            }
-        }
-
-        function mostrarModalUnidad() {
-            const contenedor = document.getElementById('listaUnidadesConfig');
-            contenedor.innerHTML = '';
-            if(datosGenerales.unidades && datosGenerales.unidades.length > 0) {
-                datosGenerales.unidades.forEach((u) => {
-                    contenedor.innerHTML += `
-                        <div class="flex-row unidad-fila" style="align-items: center; background: #f8fafc; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px;">
-                            <input type="text" value="${u.nombre}" placeholder="Nombre" class="form-control u-nombre" style="margin-bottom:0;">
-                            <input type="date" value="${u.inicio}" class="form-control u-inicio" style="margin-bottom:0;">
-                            <input type="date" value="${u.fin}" class="form-control u-fin" style="margin-bottom:0;">
-                        </div>`;
-                });
-            } else {
-                agregarFilaUnidadConfig();
-            }
-            document.getElementById('modalUnidad').classList.remove('hidden');
-        }
-
-        function agregarFilaUnidadConfig() {
-            const contenedor = document.getElementById('listaUnidadesConfig');
-            contenedor.innerHTML += `
-                <div class="flex-row unidad-fila" style="align-items: center; background: #f8fafc; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px;">
-                    <input type="text" placeholder="Ej. I Unidad" class="form-control u-nombre" style="margin-bottom:0;">
-                    <input type="date" class="form-control u-inicio" style="margin-bottom:0;">
-                    <input type="date" class="form-control u-fin" style="margin-bottom:0;">
-                </div>`;
-        }
-
-        async function guardarTodasUnidades() {
-            const filas = document.querySelectorAll('.unidad-fila');
-            let nuevasUnidades = [];
-            filas.forEach(f => {
-                const nombre = f.querySelector('.u-nombre').value;
-                const inicio = f.querySelector('.u-inicio').value;
-                const fin = f.querySelector('.u-fin').value;
-                if(nombre && inicio && fin) {
-                    nuevasUnidades.push({ nombre, inicio, fin });
-                }
-            });
-
-            const res = await callAPI({ action: "actualizarUnidades", unidadesArray: nuevasUnidades });
-            if(res && res.success) {
-                alert(res.message);
-                document.getElementById('modalUnidad').classList.add('hidden');
-                cargarCalendario();
-            }
-        }
-
-        function mostrarModalUser() {
-            document.getElementById('modalUser').classList.remove('hidden');
-        }
-
-        async function registrarNuevoUsuario() {
-            const user = document.getElementById('nuevoUser').value;
-            const clave = document.getElementById('nuevaClave').value;
-            const rol = document.getElementById('nuevoRol').value;
-            if(!user || !clave) return alert("Llena todos los campos.");
-
-            const res = await callAPI({ action: "crearUsuario", nuevoUser: user, nuevaClave: clave, nuevoRol: rol });
-            if(res && res.success) {
-                alert(res.message);
-                document.getElementById('modalUser').classList.add('hidden');
-                document.getElementById('nuevoUser').value = '';
-                document.getElementById('nuevaClave').value = '';
-            } else {
-                alert(res ? res.message : "Error al crear usuario");
-            }
-        }
-
-        function actualizarSelectorReporte() {
+        async function actualizarUnidadesReporte() {
+            const unidades = await callAPI({ action: "obtenerUnidades" });
             const select = document.getElementById('selectUnidadesReporte');
             select.innerHTML = '';
-            if(datosGenerales.unidades) {
-                datosGenerales.unidades.forEach(u => {
+            if(unidades && unidades.length > 0) {
+                unidades.forEach(u => {
                     select.innerHTML += `<option value="${u.inicio}|${u.fin}">${u.nombre} (${u.inicio} al ${u.fin})</option>`;
                 });
+            } else {
+                select.innerHTML = `<option value="">No hay unidades configuradas</option>`;
             }
         }
 
         async function generarReporte() {
             const val = document.getElementById('selectUnidadesReporte').value;
-            if(!val) return alert("No hay unidades configuradas.");
+            if(!val) return alert("Selecciona una unidad válida");
             const [inicio, fin] = val.split('|');
-
-            const resultado = await callAPI({ action: "obtenerReporteBimestre", inicio, fin });
-            if(resultado && resultado.length > 0) {
-                let ventana = window.open('', '_blank');
-                let html = `<html><head><title>Reporte</title></head><body style="font-family:sans-serif; padding:20px;">`;
-                html += `<h2>Reporte de Actividades (${inicio} a ${fin})</h2><table border="1" cellpadding="6" style="border-collapse:collapse; width:100%;">`;
-                html += `<tr><th>Fecha</th><th>Tipo/Creador</th><th>Asignatura</th><th>Descripción</th></tr>`;
-                resultado.forEach(r => {
-                    html += `<tr><td>${r.fecha}</td><td><b>[${r.tipo}]</b> (${r.creador})</td><td>${r.asignatura}</td><td>${r.descripcion}</td></tr>`;
+            
+            const unidades = await callAPI({ action: "obtenerUnidades" });
+            const selectUnidadObj = document.getElementById('selectUnidadesReporte');
+            const nombreUnidadTexto = selectUnidadObj.options[selectUnidadObj.selectedIndex].text;
+            
+            const reporte = await callAPI({ action: "obtenerReporteBimestre", inicio, fin });
+            const tbody = document.getElementById('tablaReporteCuerpo');
+            tbody.innerHTML = '';
+            
+            if(reporte && reporte.length > 0) {
+                reporte.forEach(r => {
+                    tbody.innerHTML += `
+                        <tr>
+                            <td class="border border-gray-400 p-2">${r.fecha}</td>
+                            <td class="border border-gray-400 p-2 font-semibold">[${r.tipo}]<br><span class="text-xs text-gray-600">${r.creador}</span></td>
+                            <td class="border border-gray-400 p-2">${r.descripcion}</td>
+                        </tr>`;
                 });
-                html += `</table></body></html>`;
-                ventana.document.write(html);
-                ventana.document.close();
-                ventana.print();
+                document.getElementById('printUnidadNombre').innerText = nombreUnidadTexto;
+                window.print();
             } else {
-                alert("No hay actividades registradas en este período.");
+                alert("No hay actividades registradas en este rango de fechas.");
             }
+        }
+
+        function mostrarModalUser() {
+            let nuevoUser = prompt("Ingrese el nombre del nuevo usuario:");
+            if(!nuevoUser) return;
+            let nuevaClave = prompt("Ingrese la contraseña:");
+            if(!nuevaClave) return;
+            let nuevoRol = prompt("Ingrese el rol (Administrador, Comisión, Profesor):");
+            if(!nuevoRol) return;
+
+            callAPI({ action: "crearUsuario", nuevoUser, nuevaClave, nuevoRol }).then(res => {
+                alert(res ? res.message : "Usuario creado");
+            });
+        }
+
+        function mostrarModalUnidad() {
+            let nombre = prompt("Nombre de la Unidad (ej. Unidad 1):");
+            if(!nombre) return;
+            let inicio = prompt("Fecha de inicio (YYYY-MM-DD):");
+            if(!inicio) return;
+            let fin = prompt("Fecha de fin (YYYY-MM-DD):");
+            if(!fin) return;
+
+            callAPI({ action: "guardarUnidad", nombre, inicio, fin }).then(res => {
+                alert(res ? res.message : "Unidad guardada");
+                actualizarUnidadesReporte();
+            });
         }
     </script>
 </body>
