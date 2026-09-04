@@ -19,7 +19,6 @@
         .container { max-width: 1100px; margin: 0 auto; }
         .card { background: var(--card-bg); border-radius: 8px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px; border: 1px solid #e2e8f0; }
         
-        /* LOGIN */
         #loginBox { max-width: 400px; margin: 80px auto; padding: 30px; background: white; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
         .form-control { width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 14px; }
         .btn { width: 100%; padding: 10px; background: var(--primary); color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 14px; }
@@ -34,24 +33,20 @@
         .btn-green:hover { background: #15803d; }
         .btn-secondary { background: #64748b; }
         
-        /* HEADER Y PANELES */
         header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #e2e8f0; padding-bottom: 15px; margin-bottom: 20px; }
         .grid-tools { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px; margin-bottom: 20px; }
         
-        /* CALENDARIO */
         .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; }
         .calendar-header { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; text-align: center; font-weight: bold; color: #475569; margin-bottom: 8px; }
         .day-cell { border: 1px solid var(--border-color); border-radius: 6px; padding: 8px; min-height: 95px; cursor: pointer; background: white; display: flex; flex-direction: column; justify-content: space-between; transition: 0.2s; }
         .day-cell:hover { background: #f1f5f9; }
         
-        /* ESTADOS DE DIAS */
         .bg-disponible { background-color: #def7ec; color: #03543f; }
         .bg-media { background-color: #fef08a; color: #713f12; }
         .bg-lleno { background-color: #fee2e2; color: #991b1b; }
         .borde-unidad-inicio { border-left: 5px solid #2563eb !important; }
         .borde-unidad-fin { border-right: 5px solid #dc2626 !important; }
 
-        /* MODALES */
         .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; padding: 20px; z-index: 1000; }
         .modal-content { background: white; padding: 25px; border-radius: 8px; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
         
@@ -248,8 +243,8 @@
 
         async function cargarCalendario() {
             const [year, month] = document.getElementById('selectorMes').value.split('-');
-            const respuesta = await callAPI({ action: "obtenerDatosMes", year, month });
-            if (respuesta) {
+            const respuesta = await callAPI({ action: "obtenerDatosMes", year: parseInt(year), month: parseInt(month) - 1 });
+            if (respuesta && respuesta.success) {
                 datosGenerales = respuesta;
                 renderizarDias(parseInt(year), parseInt(month) - 1);
                 actualizarSelectorReporte();
@@ -428,14 +423,18 @@
         function mostrarModalUnidad() {
             const contenedor = document.getElementById('listaUnidadesConfig');
             contenedor.innerHTML = '';
-            datosGenerales.unidades.forEach((u) => {
-                contenedor.innerHTML += `
-                    <div class="flex-row unidad-fila" style="align-items: center; background: #f8fafc; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px;">
-                        <input type="text" value="${u.nombre}" placeholder="Nombre" class="form-control u-nombre" style="margin-bottom:0;">
-                        <input type="date" value="${u.inicio}" class="form-control u-inicio" style="margin-bottom:0;">
-                        <input type="date" value="${u.fin}" class="form-control u-fin" style="margin-bottom:0;">
-                    </div>`;
-            });
+            if(datosGenerales.unidades && datosGenerales.unidades.length > 0) {
+                datosGenerales.unidades.forEach((u) => {
+                    contenedor.innerHTML += `
+                        <div class="flex-row unidad-fila" style="align-items: center; background: #f8fafc; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px;">
+                            <input type="text" value="${u.nombre}" placeholder="Nombre" class="form-control u-nombre" style="margin-bottom:0;">
+                            <input type="date" value="${u.inicio}" class="form-control u-inicio" style="margin-bottom:0;">
+                            <input type="date" value="${u.fin}" class="form-control u-fin" style="margin-bottom:0;">
+                        </div>`;
+                });
+            } else {
+                agregarFilaUnidadConfig();
+            }
             document.getElementById('modalUnidad').classList.remove('hidden');
         }
 
@@ -483,15 +482,21 @@
             if(res && res.success) {
                 alert(res.message);
                 document.getElementById('modalUser').classList.add('hidden');
+                document.getElementById('nuevoUser').value = '';
+                document.getElementById('nuevaClave').value = '';
+            } else {
+                alert(res ? res.message : "Error al crear usuario");
             }
         }
 
         function actualizarSelectorReporte() {
             const select = document.getElementById('selectUnidadesReporte');
             select.innerHTML = '';
-            datosGenerales.unidades.forEach(u => {
-                select.innerHTML += `<option value="${u.inicio}|${u.fin}">${u.nombre} (${u.inicio} al ${u.fin})</option>`;
-            });
+            if(datosGenerales.unidades) {
+                datosGenerales.unidades.forEach(u => {
+                    select.innerHTML += `<option value="${u.inicio}|${u.fin}">${u.nombre} (${u.inicio} al ${u.fin})</option>`;
+                });
+            }
         }
 
         async function generarReporte() {
