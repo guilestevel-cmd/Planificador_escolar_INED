@@ -194,8 +194,10 @@
         }
 
         async function ejecutarLogin() {
-            const u = document.getElementById('user').value;
-            const p = document.getElementById('pass').value;
+            const u = document.getElementById('user').value.trim();
+            const p = document.getElementById('pass').value.trim();
+            if(!u || !p) return alert("Ingresa usuario y contraseña");
+
             const res = await callAPI({ action: "login", usuario: u, clave: p });
             
             if(res && res.success) {
