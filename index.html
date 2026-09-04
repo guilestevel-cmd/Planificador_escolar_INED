@@ -4,13 +4,64 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Planificador Bimestral Escolar</title>
-    <script src="https://tailwindcss.com"></script>
     <style>
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-color: #1e293b;
+            --border-color: #cbd5e1;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: var(--bg-color); color: var(--text-color); padding: 20px; }
+        
+        .container { max-width: 1100px; margin: 0 auto; }
+        .card { background: var(--card-bg); border-radius: 8px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px; border: 1px solid #e2e8f0; }
+        
+        /* LOGIN */
+        #loginBox { max-width: 400px; margin: 80px auto; padding: 30px; background: white; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .form-control { width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 14px; }
+        .btn { width: 100%; padding: 10px; background: var(--primary); color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 14px; }
+        .btn:hover { background: var(--primary-hover); }
+        .btn-danger { background: #dc2626; }
+        .btn-danger:hover { background: #b91c1c; }
+        .btn-purple { background: #7c3aed; }
+        .btn-purple:hover { background: #6d28d9; }
+        .btn-indigo { background: #4f46e5; }
+        .btn-indigo:hover { background: #4338ca; }
+        .btn-green { background: #16a34a; }
+        .btn-green:hover { background: #15803d; }
+        .btn-secondary { background: #64748b; }
+        
+        /* HEADER Y PANELES */
+        header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #e2e8f0; padding-bottom: 15px; margin-bottom: 20px; }
+        .grid-tools { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        
+        /* CALENDARIO */
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; }
+        .calendar-header { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; text-align: center; font-weight: bold; color: #475569; margin-bottom: 8px; }
+        .day-cell { border: 1px solid var(--border-color); border-radius: 6px; padding: 8px; min-height: 95px; cursor: pointer; background: white; display: flex; flex-direction: column; justify-content: space-between; transition: 0.2s; }
+        .day-cell:hover { background: #f1f5f9; }
+        
+        /* ESTADOS DE DIAS */
         .bg-disponible { background-color: #def7ec; color: #03543f; }
         .bg-media { background-color: #fef08a; color: #713f12; }
         .bg-lleno { background-color: #fee2e2; color: #991b1b; }
         .borde-unidad-inicio { border-left: 5px solid #2563eb !important; }
         .borde-unidad-fin { border-right: 5px solid #dc2626 !important; }
+
+        /* MODALES */
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; padding: 20px; z-index: 1000; }
+        .modal-content { background: white; padding: 25px; border-radius: 8px; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+        
+        .hidden { display: none !important; }
+        .text-center { text-align: center; }
+        .text-sm { font-size: 12px; }
+        .font-bold { font-weight: bold; }
+        .flex-row { display: flex; gap: 10px; }
+        
+        /* IMPRESIÓN */
         @media print {
             body * { display: none; }
             #seccionImprimir, #seccionImprimir * { display: block; }
@@ -18,137 +69,136 @@
         }
     </style>
 </head>
-<body class="bg-gray-50 text-gray-800 font-sans">
+<body>
 
     <!-- LOGIN -->
-    <div id="loginBox" class="max-w-md mx-auto mt-20 p-6 bg-white rounded-lg shadow-md">
-        <h2 class="text-2xl font-bold mb-2 text-center text-blue-600">Planificador Escolar</h2>
-        <p class="text-xs text-center text-gray-500 mb-4">Ingresa con tus credenciales asignadas</p>
-        <input type="text" id="user" placeholder="Usuario (Ej. admin o tu nombre)" class="w-full p-2 border mb-3 rounded">
-        <input type="password" id="pass" placeholder="Contraseña" class="w-full p-2 border mb-4 rounded">
-        <button onclick="ejecutarLogin()" class="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700 font-bold">Ingresar</button>
-        <div class="mt-4 text-xs text-gray-400 text-center">
-            Acceso Admin por defecto: usuario <b>admin</b> / clave <b>admin123</b>
+    <div id="loginBox" class="card">
+        <h2 class="text-center font-bold" style="color: var(--primary); font-size: 24px; margin-bottom: 5px;">Planificador Escolar</h2>
+        <p class="text-center text-sm" style="color: #64748b; margin-bottom: 20px;">Ingresa con tus credenciales asignadas</p>
+        <input type="text" id="user" placeholder="Usuario (Ej. admin)" class="form-control">
+        <input type="password" id="pass" placeholder="Contraseña" class="form-control">
+        <button onclick="ejecutarLogin()" class="btn">Ingresar</button>
+        <div class="text-center text-sm" style="color: #94a3b8; margin-top: 15px;">
+            Admin por defecto: <b>admin</b> / <b>admin123</b>
         </div>
     </div>
 
     <!-- PANEL PRINCIPAL -->
-    <div id="appContainer" class="hidden max-w-6xl mx-auto p-4">
-        <header class="flex justify-between items-center mb-6 border-b pb-4">
+    <div id="appContainer" class="container hidden">
+        <header>
             <div>
-                <h1 class="text-3xl font-bold text-gray-900">Calendario Bimestral</h1>
-                <p class="text-sm text-gray-500">Sesión: <span id="sesionNombre" class="font-bold"></span> (<span id="sesionRol" class="text-blue-600 font-semibold"></span>)</p>
+                <h1 style="font-size: 24px; font-weight: bold;">Calendario Bimestral</h1>
+                <p class="text-sm" style="color: #64748b;">Sesión: <span id="sesionNombre" class="font-bold"></span> (<span id="sesionRol" style="color: var(--primary);"></span>)</p>
             </div>
-            <button onclick="location.reload()" class="bg-red-500 text-white px-4 py-2 rounded text-sm hover:bg-red-600">Salir</button>
+            <button onclick="location.reload()" class="btn btn-danger" style="width: auto; padding: 8px 16px;">Salir</button>
         </header>
 
-        <!-- MENÚ DE HERRAMIENTAS / ROLES -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            <!-- Panel de Administración -->
-            <div id="adminPanel" class="hidden bg-white p-4 rounded-lg shadow border">
-                <h3 class="font-bold text-lg mb-2 text-indigo-700">⚙️ Administración</h3>
-                <button onclick="mostrarModalUser()" class="w-full bg-indigo-600 text-white p-2 rounded mb-2 text-sm hover:bg-indigo-700">Crear Usuarios</button>
-                <button onclick="mostrarModalUnidad()" class="w-full bg-purple-600 text-white p-2 rounded text-sm hover:bg-purple-700">Configurar / Editar Unidades</button>
+        <!-- HERRAMIENTAS -->
+        <div class="grid-tools">
+            <div id="adminPanel" class="card hidden" style="margin-bottom: 0;">
+                <h3 class="font-bold" style="color: #4f46e5; margin-bottom: 10px;">⚙️ Administración</h3>
+                <button onclick="mostrarModalUser()" class="btn btn-indigo text-sm" style="margin-bottom: 8px;">Crear Usuarios</button>
+                <button onclick="mostrarModalUnidad()" class="btn btn-purple text-sm">Configurar / Editar Unidades</button>
             </div>
 
-            <div class="bg-white p-4 rounded-lg shadow border flex flex-col justify-center">
-                <label class="block font-medium mb-1 text-sm">Ver otro mes:</label>
-                <input type="month" id="selectorMes" onchange="cargarCalendario()" class="p-2 border rounded">
-                <div class="mt-2 text-xs text-gray-500 flex items-center space-x-2">
-                    <span class="inline-block w-3 h-3 bg-blue-600"></span> <span>Inicio Unidad</span>
-                    <span class="inline-block w-3 h-3 bg-red-600 ml-2"></span> <span>Fin Unidad</span>
+            <div class="card" style="margin-bottom: 0;">
+                <label class="font-bold text-sm" style="display: block; margin-bottom: 5px;">Ver otro mes:</label>
+                <input type="month" id="selectorMes" onchange="cargarCalendario()" class="form-control" style="margin-bottom: 8px;">
+                <div class="text-sm" style="color: #64748b; display: flex; align-items: center; gap: 8px;">
+                    <span style="width: 12px; height: 12px; background: #2563eb; display: inline-block;"></span> Inicio Unidad
+                    <span style="width: 12px; height: 12px; background: #dc2626; display: inline-block; margin-left: 10px;"></span> Fin Unidad
                 </div>
             </div>
 
-            <div class="bg-white p-4 rounded-lg shadow border flex flex-col justify-center">
-                <label class="block font-medium mb-1 text-sm">Imprimir Reporte:</label>
-                <select id="selectUnidadesReporte" class="p-2 border rounded mb-2 text-sm"></select>
-                <button onclick="generarReporte()" class="bg-green-600 text-white p-2 rounded text-sm hover:bg-green-700">Generar Lista Bimestral</button>
+            <div class="card" style="margin-bottom: 0;">
+                <label class="font-bold text-sm" style="display: block; margin-bottom: 5px;">Imprimir Reporte:</label>
+                <select id="selectUnidadesReporte" class="form-control" style="margin-bottom: 8px;"></select>
+                <button onclick="generarReporte()" class="btn btn-green text-sm">Generar Lista Bimestral</button>
             </div>
         </div>
 
         <!-- CALENDARIO -->
-        <div class="bg-white p-6 rounded-lg shadow">
-            <div class="grid grid-cols-7 gap-2 text-center font-bold text-gray-600 mb-2">
+        <div class="card">
+            <div class="calendar-header">
                 <div>Dom</div><div>Lun</div><div>Mar</div><div>Mié</div><div>Jue</div><div>Vie</div><div>Sáb</div>
             </div>
-            <div id="calendarioGrid" class="grid grid-cols-7 gap-2 min-h-[400px]"></div>
+            <div id="calendarioGrid" class="calendar-grid"></div>
         </div>
     </div>
 
-    <!-- MODAL DETALLES / AGREGAR ACTIVIDAD -->
-    <div id="modalDia" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-lg p-6 max-w-lg w-full shadow-xl max-h-[90vh] overflow-y-auto">
-            <h3 id="modalFechaTitulo" class="text-xl font-bold mb-2 text-blue-700"></h3>
-            <div id="infoUnidadDia" class="text-xs bg-blue-50 text-blue-800 p-2 rounded mb-3 font-semibold"></div>
+    <!-- MODAL DETALLES / ACTIVIDAD -->
+    <div id="modalDia" class="modal-overlay">
+        <div class="modal-content">
+            <h3 id="modalFechaTitulo" class="font-bold" style="color: var(--primary); margin-bottom: 8px; font-size: 18px;"></h3>
+            <div id="infoUnidadDia" class="text-sm" style="background: #e0f2fe; color: #0369a1; padding: 8px; border-radius: 4px; margin-bottom: 12px; font-weight: bold;"></div>
             
-            <div class="mb-4">
-                <h4 class="text-sm font-bold text-gray-700 mb-1">Actividades Registradas:</h4>
-                <div id="actividadesExistentes" class="space-y-2 max-h-48 overflow-y-auto pr-1"></div>
+            <div style="margin-bottom: 15px;">
+                <h4 class="text-sm font-bold" style="margin-bottom: 5px;">Actividades Registradas:</h4>
+                <div id="actividadesExistentes" style="max-height: 180px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;"></div>
             </div>
 
-            <div id="formularioActividad" class="border-t pt-4">
-                <h4 class="text-sm font-bold text-gray-700 mb-2">Registrar Nueva Actividad</h4>
+            <div style="border-top: 1px solid #e2e8f0; padding-top: 12px;">
+                <h4 class="text-sm font-bold" style="margin-bottom: 8px;">Registrar Nueva Actividad</h4>
                 
-                <div id="seccionAsignatura" class="mb-2">
-                    <label class="block text-xs font-medium mb-1">Asignatura:</label>
-                    <input type="text" id="actAsignatura" placeholder="Ej. Programación I, Computación..." class="w-full p-2 border rounded text-sm">
+                <div id="seccionAsignatura" style="margin-bottom: 8px;">
+                    <label class="text-sm" style="display: block; margin-bottom: 3px;">Asignatura:</label>
+                    <input type="text" id="actAsignatura" placeholder="Ej. Programación I" class="form-control" style="margin-bottom: 0;">
                 </div>
 
-                <label class="block text-xs font-medium mb-1">Descripción de la Actividad / Tarea:</label>
-                <textarea id="actDescripcion" class="w-full p-2 border rounded mb-3 text-sm" placeholder="Escribe los detalles..."></textarea>
+                <label class="text-sm" style="display: block; margin-bottom: 3px;">Descripción de la Actividad:</label>
+                <textarea id="actDescripcion" class="form-control" placeholder="Escribe los detalles..." style="height: 70px; resize: none;"></textarea>
                 
-                <div class="flex justify-end space-x-2">
-                    <button onclick="cerrarModal()" class="bg-gray-300 px-4 py-2 rounded text-sm">Cancelar</button>
-                    <button onclick="guardarActividad()" class="bg-blue-600 text-white px-4 py-2 rounded text-sm hover:bg-blue-700">Guardar Actividad</button>
+                <div class="flex-row" style="justify-content: flex-end;">
+                    <button onclick="cerrarModal()" class="btn btn-secondary" style="width: auto; padding: 8px 16px;">Cancelar</button>
+                    <button onclick="guardarActividad()" class="btn" style="width: auto; padding: 8px 16px;">Guardar</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- MODAL CONFIGURAR UNIDADES -->
-    <div id="modalUnidad" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-lg p-6 max-w-lg w-full shadow-xl">
-            <h3 class="text-xl font-bold mb-4 text-purple-700">📅 Configurar Unidades Escolares</h3>
-            <div id="listaUnidadesConfig" class="space-y-3 mb-4 max-h-60 overflow-y-auto"></div>
-            <button onclick="agregarFilaUnidadConfig()" class="w-full bg-gray-200 text-gray-700 p-2 rounded text-sm mb-4 hover:bg-gray-300">+ Añadir otra unidad</button>
-            <div class="flex justify-end space-x-2 border-t pt-3">
-                <button onclick="document.getElementById('modalUnidad').classList.add('hidden')" class="bg-gray-300 px-4 py-2 rounded text-sm">Cancelar</button>
-                <button onclick="guardarTodasUnidades()" class="bg-purple-600 text-white px-4 py-2 rounded text-sm hover:bg-purple-700">Guardar Cambios</button>
+    <!-- MODAL UNIDADES -->
+    <div id="modalUnidad" class="modal-overlay">
+        <div class="modal-content">
+            <h3 class="font-bold" style="color: #7c3aed; margin-bottom: 15px; font-size: 18px;">📅 Configurar Unidades</h3>
+            <div id="listaUnidadesConfig" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px; max-height: 220px; overflow-y: auto;"></div>
+            <button onclick="agregarFilaUnidadConfig()" class="btn btn-secondary text-sm" style="margin-bottom: 15px;">+ Añadir otra unidad</button>
+            <div class="flex-row" style="justify-content: flex-end; border-top: 1px solid #e2e8f0; padding-top: 10px;">
+                <button onclick="document.getElementById('modalUnidad').classList.add('hidden')" class="btn btn-secondary" style="width: auto; padding: 8px 16px;">Cancelar</button>
+                <button onclick="guardarTodasUnidades()" class="btn btn-purple" style="width: auto; padding: 8px 16px;">Guardar Cambios</button>
             </div>
         </div>
     </div>
 
-    <!-- MODAL CREAR USUARIOS -->
-    <div id="modalUser" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-lg p-6 max-w-md w-full shadow-xl">
-            <h3 class="text-xl font-bold mb-4 text-indigo-700">👤 Crear Nuevo Usuario</h3>
-            <input type="text" id="nuevoUser" placeholder="Nombre de Usuario" class="w-full p-2 border mb-3 rounded text-sm">
-            <input type="password" id="nuevaClave" placeholder="Contraseña" class="w-full p-2 border mb-3 rounded text-sm">
-            <select id="nuevoRol" class="w-full p-2 border mb-4 rounded text-sm">
+    <!-- MODAL USUARIOS -->
+    <div id="modalUser" class="modal-overlay">
+        <div class="modal-content" style="max-width: 400px;">
+            <h3 class="font-bold" style="color: #4f46e5; margin-bottom: 15px; font-size: 18px;">👤 Crear Nuevo Usuario</h3>
+            <input type="text" id="nuevoUser" placeholder="Nombre de Usuario" class="form-control">
+            <input type="password" id="nuevaClave" placeholder="Contraseña" class="form-control">
+            <select id="nuevoRol" class="form-control" style="margin-bottom: 15px;">
                 <option value="Profesor">Profesor</option>
                 <option value="Comisión">Comisión</option>
                 <option value="Dirección">Dirección</option>
                 <option value="Administrador">Administrador</option>
             </select>
-            <div class="flex justify-end space-x-2">
-                <button onclick="document.getElementById('modalUser').classList.add('hidden')" class="bg-gray-300 px-4 py-2 rounded text-sm">Cancelar</button>
-                <button onclick="registrarNuevoUsuario()" class="bg-indigo-600 text-white px-4 py-2 rounded text-sm hover:bg-indigo-700">Crear Usuario</button>
+            <div class="flex-row" style="justify-content: flex-end;">
+                <button onclick="document.getElementById('modalUser').classList.add('hidden')" class="btn btn-secondary" style="width: auto; padding: 8px 16px;">Cancelar</button>
+                <button onclick="registrarNuevoUsuario()" class="btn btn-indigo" style="width: auto; padding: 8px 16px;">Crear</button>
             </div>
         </div>
     </div>
 
     <!-- VISTA DE IMPRESIÓN -->
-    <div id="seccionImprimir" class="hidden p-8">
-        <h1 class="text-2xl font-bold text-center mb-1">Agenda de Actividades y Tareas Bimestrales</h1>
-        <h3 id="printUnidadNombre" class="text-center text-lg mb-6 border-b pb-2 font-medium text-gray-600"></h3>
-        <table class="w-full border-collapse border border-gray-400 text-sm">
+    <div id="seccionImprimir" class="hidden" style="padding: 20px;">
+        <h1 style="font-size: 22px; font-weight: bold; text-align: center; margin-bottom: 5px;">Agenda de Actividades y Tareas Bimestrales</h1>
+        <h3 id="printUnidadNombre" style="text-align: center; font-size: 16px; margin-bottom: 20px; color: #475569; border-bottom: 1px solid #ccc; padding-bottom: 10px;"></h3>
+        <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
             <thead>
-                <tr class="bg-gray-100">
-                    <th class="border border-gray-400 p-2 text-left">Fecha</th>
-                    <th class="border border-gray-400 p-2 text-left">Tipo / Creador</th>
-                    <th class="border border-gray-400 p-2 text-left">Asignatura</th>
-                    <th class="border border-gray-400 p-2 text-left">Descripción</th>
+                <tr style="background: #f1f5f9;">
+                    <th style="border: 1px solid #94a3b8; padding: 8px; text-align: left;">Fecha</th>
+                    <th style="border: 1px solid #94a3b8; padding: 8px; text-align: left;">Tipo / Creador</th>
+                    <th style="border: 1px solid #94a3b8; padding: 8px; text-align: left;">Asignatura</th>
+                    <th style="border: 1px solid #94a3b8; padding: 8px; text-align: left;">Descripción</th>
                 </tr>
             </thead>
             <tbody id="tablaReporteCuerpo"></tbody>
@@ -223,37 +273,36 @@
                 const diaPad = String(dia).padStart(2,'0');
                 const llaveFecha = `${year}-${mesPad}-${diaPad}`;
 
-                celda.className = "border rounded p-2 cursor-pointer h-24 flex flex-col justify-between transition-colors bg-white hover:bg-gray-50";
+                celda.className = "day-cell";
 
-                // Verificar si coincide con inicio o fin de alguna unidad
                 datosGenerales.unidades.forEach(u => {
                     if (u.inicio === llaveFecha) celda.classList.add('borde-unidad-inicio');
                     if (u.fin === llaveFecha) celda.classList.add('borde-unidad-fin');
                 });
 
-                let htmlContenido = `<span class="font-bold text-sm">${dia}</span>`;
+                let htmlContenido = `<span class="font-bold" style="font-size: 13px;">${dia}</span>`;
                 let info = datosGenerales.conteo[llaveFecha];
 
                 if(info) {
                     if(info.comision) {
                         celda.classList.add('bg-lleno');
-                        htmlContenido += `<span class="text-[10px] bg-red-200 text-red-900 px-1 rounded block truncate font-bold">Comisión</span>`;
+                        htmlContenido += `<span class="text-sm" style="background:#fca5a5; color:#7f1d1d; padding:2px; border-radius:3px; font-weight:bold; display:block; text-align:center;">Comisión</span>`;
                     } else if(info.direccion) {
                         celda.classList.add('bg-lleno');
-                        htmlContenido += `<span class="text-[10px] bg-purple-200 text-purple-900 px-1 rounded block truncate font-bold">Dirección</span>`;
+                        htmlContenido += `<span class="text-sm" style="background:#d8b4fe; color:#581c87; padding:2px; border-radius:3px; font-weight:bold; display:block; text-align:center;">Dirección</span>`;
                     } else if(info.tareas >= 5) {
                         celda.classList.add('bg-lleno');
-                        htmlContenido += `<span class="text-[10px] text-center font-semibold block text-red-700">Lleno (5 tareas)</span>`;
+                        htmlContenido += `<span class="text-sm font-bold" style="display:block; text-align:center;">Lleno (5 tareas)</span>`;
                     } else if(info.tareas >= 3) {
                         celda.classList.add('bg-media');
-                        htmlContenido += `<span class="text-[10px] block font-semibold">${info.tareas} tareas</span>`;
+                        htmlContenido += `<span class="text-sm font-bold" style="display:block; text-align:center;">${info.tareas} tareas</span>`;
                     } else {
                         celda.classList.add('bg-disponible');
-                        htmlContenido += `<span class="text-[10px] block font-semibold">${info.tareas} tareas</span>`;
+                        htmlContenido += `<span class="text-sm font-bold" style="display:block; text-align:center;">${info.tareas} tareas</span>`;
                     }
                 } else {
                     celda.classList.add('bg-disponible');
-                    htmlContenido += `<span class="text-[10px] block text-green-700">Disponible</span>`;
+                    htmlContenido += `<span class="text-sm" style="color: #047857; display:block; text-align:center;">Disponible</span>`;
                 }
 
                 celda.innerHTML = htmlContenido;
@@ -266,18 +315,16 @@
             fechaSeleccionada = fecha;
             document.getElementById('modalFechaTitulo').innerText = `Actividades del: ${fecha}`;
             
-            // Detectar unidad automáticamente por fecha
             let unidadEncontrada = datosGenerales.unidades.find(u => fecha >= u.inicio && fecha <= u.fin);
             const infoUnidadDiv = document.getElementById('infoUnidadDia');
             if(unidadEncontrada) {
                 infoUnidadDiv.innerText = `📌 Rango detectado: ${unidadEncontrada.nombre} (${unidadEncontrada.inicio} al ${unidadEncontrada.fin})`;
                 infoUnidadDiv.classList.remove('hidden');
             } else {
-                infoUnidadDiv.innerText = "⚠️ Esta fecha está fuera del rango oficial de las unidades configuradas.";
+                infoUnidadDiv.innerText = "⚠️ Fuera del rango oficial de las unidades.";
                 infoUnidadDiv.classList.remove('hidden');
             }
 
-            // Ocultar campo asignatura si es comisión o dirección
             const seccionAsignatura = document.getElementById('seccionAsignatura');
             if(rolActual === 'Comisión' || rolActual === 'Dirección') {
                 seccionAsignatura.classList.add('hidden');
@@ -292,29 +339,30 @@
             if(info && info.detalles.length > 0) {
                 info.detalles.forEach(act => {
                     let esMiActividad = (act.creador === usuarioActual || rolActual === 'Administrador');
-                    let badgeColor = act.tipo === 'Comisión' ? 'bg-red-100 text-red-800' : (act.tipo === 'Dirección' ? 'bg-purple-100 text-purple-850' : 'bg-blue-100 text-blue-800');
+                    let badgeBg = act.tipo === 'Comisión' ? '#fee2e2' : (act.tipo === 'Dirección' ? '#f3e8ff' : '#e0f2fe');
+                    let badgeColor = act.tipo === 'Comisión' ? '#991b1b' : (act.tipo === 'Dirección' ? '#6b21a8' : '#0369a1');
                     
                     let htmlItem = `
-                        <div class="p-2 border rounded bg-gray-50 text-xs flex justify-between items-start">
+                        <div style="border: 1px solid #cbd5e1; border-radius: 6px; padding: 8px; background: #f8fafc; font-size: 12px; display: flex; justify-content: space-between; align-items: flex-start;">
                             <div>
-                                <span class="px-1 rounded font-bold ${badgeColor}">[${act.tipo}]</span> 
-                                <span class="font-semibold">(${act.creador})</span> 
-                                ${act.asignatura !== 'N/A' ? `- <span class="text-indigo-700 font-medium">[${act.asignatura}]</span>` : ''}
-                                <p class="mt-1 text-gray-700">${act.descripcion}</p>
+                                <span style="background: ${badgeBg}; color: ${badgeColor}; padding: 1px 4px; border-radius: 3px; font-weight: bold;">[${act.tipo}]</span> 
+                                <span class="font-bold">(${act.creador})</span> 
+                                ${act.asignatura !== 'N/A' ? `- <span style="color: #4f46e5; font-weight: 600;">[${act.asignatura}]</span>` : ''}
+                                <p style="margin-top: 4px; color: #334155;">${act.descripcion}</p>
                             </div>`;
                     
                     if(esMiActividad) {
                         htmlItem += `
-                            <div class="flex flex-col space-y-1 ml-2">
-                                <button onclick="editarActividadPrompt(${act.idFila}, '${act.descripcion.replace(/'/g, "\\'")}', '${act.asignatura}')" class="text-blue-600 hover:underline">Editar</button>
-                                <button onclick="eliminarActividad(${act.idFila})" class="text-red-600 hover:underline">Borrar</button>
+                            <div style="display: flex; flex-direction: column; gap: 4px; margin-left: 10px;">
+                                <button onclick="editarActividadPrompt(${act.idFila}, '${act.descripcion.replace(/'/g, "\\'")}', '${act.asignatura}')" style="background:none; border:none; color:#2563eb; cursor:pointer; font-size:11px;">Editar</button>
+                                <button onclick="eliminarActividad(${act.idFila})" style="background:none; border:none; color:#dc2626; cursor:pointer; font-size:11px;">Borrar</button>
                             </div>`;
                     }
                     htmlItem += `</div>`;
                     contenedor.innerHTML += htmlItem;
                 });
             } else {
-                contenedor.innerHTML = '<p class="text-sm text-gray-500 italic">No hay actividades registradas en este día.</p>';
+                contenedor.innerHTML = '<p class="text-sm" style="color: #64748b; font-style: italic;">No hay actividades registradas en este día.</p>';
             }
 
             document.getElementById('modalDia').classList.remove('hidden');
@@ -333,10 +381,8 @@
             if(!desc.trim()) return alert("Escribe una descripción.");
             if(rolActual === 'Profesor' && !asignatura.trim()) return alert("Indica la asignatura.");
 
-            let tipoActividad = 'Profesor';
-            if(rolActual === 'Comisión') tipoActividad = 'Comisión';
-            if(rolActual === 'Dirección') tipoActividad = 'Dirección';
-            if(rolActual === 'Administrador') tipoActividad = 'Dirección'; // Admin por defecto como dirección o comisión según se prefiera
+            let tipoActividad = rolActual;
+            if(rolActual === 'Administrador') tipoActividad = 'Dirección';
 
             const res = await callAPI({
                 action: "agregarActividad",
@@ -367,7 +413,7 @@
         }
 
         async function editarActividadPrompt(idFila, descActual, asigActual) {
-            const nuevaDesc = prompt("Modificar descripción de la actividad:", descActual);
+            const nuevaDesc = prompt("Modificar descripción:", descActual);
             if(nuevaDesc === null) return;
             const nuevaAsig = prompt("Modificar asignatura:", asigActual);
             if(nuevaAsig === null) return;
@@ -383,12 +429,12 @@
         function mostrarModalUnidad() {
             const contenedor = document.getElementById('listaUnidadesConfig');
             contenedor.innerHTML = '';
-            datosGenerales.unidades.forEach((u, index) => {
+            datosGenerales.unidades.forEach((u) => {
                 contenedor.innerHTML += `
-                    <div class="flex space-x-2 items-center border p-2 rounded bg-gray-50 unidad-fila">
-                        <input type="text" value="${u.nombre}" placeholder="Nombre Unidad" class="p-1 border rounded w-1/3 text-sm u-nombre">
-                        <input type="date" value="${u.inicio}" class="p-1 border rounded w-1/3 text-sm u-inicio">
-                        <input type="date" value="${u.fin}" class="p-1 border rounded w-1/3 text-sm u-fin">
+                    <div class="flex-row unidad-fila" style="align-items: center; background: #f8fafc; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px;">
+                        <input type="text" value="${u.nombre}" placeholder="Nombre" class="form-control u-nombre" style="margin-bottom:0;">
+                        <input type="date" value="${u.inicio}" class="form-control u-inicio" style="margin-bottom:0;">
+                        <input type="date" value="${u.fin}" class="form-control u-fin" style="margin-bottom:0;">
                     </div>`;
             });
             document.getElementById('modalUnidad').classList.remove('hidden');
@@ -397,10 +443,10 @@
         function agregarFilaUnidadConfig() {
             const contenedor = document.getElementById('listaUnidadesConfig');
             contenedor.innerHTML += `
-                <div class="flex space-x-2 items-center border p-2 rounded bg-gray-50 unidad-fila">
-                    <input type="text" placeholder="Ej. I Unidad" class="p-1 border rounded w-1/3 text-sm u-nombre">
-                    <input type="date" class="p-1 border rounded w-1/3 text-sm u-inicio">
-                    <input type="date" class="p-1 border rounded w-1/3 text-sm u-fin">
+                <div class="flex-row unidad-fila" style="align-items: center; background: #f8fafc; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px;">
+                    <input type="text" placeholder="Ej. I Unidad" class="form-control u-nombre" style="margin-bottom:0;">
+                    <input type="date" class="form-control u-inicio" style="margin-bottom:0;">
+                    <input type="date" class="form-control u-fin" style="margin-bottom:0;">
                 </div>`;
         }
 
@@ -451,7 +497,7 @@
 
         async function generarReporte() {
             const val = document.getElementById('selectUnidadesReporte').value;
-            if(!val) return alert("No hay unidades configuradas para generar reporte.");
+            if(!val) return alert("No hay unidades configuradas.");
             const [inicio, fin] = val.split('|');
 
             const resultado = await callAPI({ action: "obtenerReporteBimestre", inicio, fin });
@@ -462,10 +508,10 @@
                 resultado.forEach(r => {
                     cuerpo.innerHTML += `
                         <tr>
-                            <td class="border border-gray-400 p-2">${r.fecha}</td>
-                            <td class="border border-gray-400 p-2 font-semibold">[${r.tipo}] (${r.creador})</td>
-                            <td class="border border-gray-400 p-2">${r.asignatura}</td>
-                            <td class="border border-gray-400 p-2">${r.descripcion}</td>
+                            <td style="border: 1px solid #94a3b8; padding: 6px;">${r.fecha}</td>
+                            <td style="border: 1px solid #94a3b8; padding: 6px; font-weight: bold;">[${r.tipo}] (${r.creador})</td>
+                            <td style="border: 1px solid #94a3b8; padding: 6px;">${r.asignatura}</td>
+                            <td style="border: 1px solid #94a3b8; padding: 6px;">${r.descripcion}</td>
                         </tr>`;
                 });
                 document.getElementById('printUnidadNombre').innerText = `Reporte del ${inicio} al ${fin}`;
