@@ -3,7 +3,7 @@
    Pega aquí la URL /exec que te dio Apps Script al implementar
    Code.gs como aplicación web.
    ============================================================= */
-const URL_API = 'PON_AQUI_LA_URL_DE_TU_APLICACION_WEB_DE_APPS_SCRIPT';
+const URL_API = 'https://script.google.com/macros/s/AKfycbxeauudYv9NVRWMlw8eqnytW9Yl3KdC0sRyAw2-AMtdIXOV_ckRHNmLE08ofkvAcbOD0A/exec';
 
 /* ============================== constantes ============================== */
 
